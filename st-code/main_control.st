@@ -1,0 +1,57 @@
+(*
+    OMRON PLC Kiln Conveyor Control
+    Main Structured Text control logic
+*)
+
+IF E_STOP_OK AND SAFETY_DOOR_CLOSED AND MOTOR_OVERLOAD_OK AND NOT TEMP_CRITICAL AND NOT JAM_FAULT THEN
+    SYSTEM_SAFE := TRUE;
+ELSE
+    SYSTEM_SAFE := FALSE;
+END_IF;
+
+IF STOP_PB OR NOT SYSTEM_SAFE THEN
+    CONVEYOR_MOTOR_RUN := FALSE;
+    AUTO_CYCLE_ACTIVE := FALSE;
+END_IF;
+
+IF AUTO_MODE AND START_PB AND SYSTEM_SAFE THEN
+    AUTO_CYCLE_ACTIVE := TRUE;
+END_IF;
+
+IF AUTO_CYCLE_ACTIVE THEN
+    CASE SEQUENCE_STEP OF
+
+        0:
+            UNLOAD_COMPLETE := FALSE;
+            IF UNLOAD_REQUEST THEN
+                SEQUENCE_STEP := 10;
+            END_IF;
+
+        10:
+            READY_LIGHT := TRUE;
+            CONVEYOR_MOTOR_RUN := TRUE;
+
+            IF ENTRY_SENSOR THEN
+                SEQUENCE_STEP := 20;
+            END_IF;
+
+        20:
+            CONVEYOR_MOTOR_RUN := TRUE;
+
+            IF EXIT_SENSOR THEN
+                SEQUENCE_STEP := 30;
+            END_IF;
+
+        30:
+            CONVEYOR_MOTOR_RUN := FALSE;
+            UNLOAD_COMPLETE := TRUE;
+            SEQUENCE_STEP := 0;
+            AUTO_CYCLE_ACTIVE := FALSE;
+
+        ELSE
+            SEQUENCE_STEP := 0;
+            AUTO_CYCLE_ACTIVE := FALSE;
+            CONVEYOR_MOTOR_RUN := FALSE;
+
+    END_CASE;
+END_IF;
