@@ -1,0 +1,2 @@
+*.st linguist-language="Structured Text"
+*.md linguist-documentation=false
