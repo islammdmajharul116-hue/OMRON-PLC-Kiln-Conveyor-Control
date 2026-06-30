@@ -120,5 +120,5 @@ OMRON-PLC-Kiln-Conveyor-Control/
 ├── simulations/
 │   └── simulation-notes.md
 └── images/
-    └── system-diagram.png
+    └── system-diagram.md
 ```
